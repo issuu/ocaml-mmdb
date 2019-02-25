@@ -1,0 +1,3 @@
+(library
+ (name mmdb_types_bindings)
+ (libraries ctypes))
