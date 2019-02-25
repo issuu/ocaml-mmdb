@@ -1,0 +1,4 @@
+(executable
+ (name example)
+ (public_name example)
+ (libraries base stdio mmdb_ffi mmdb_types))
