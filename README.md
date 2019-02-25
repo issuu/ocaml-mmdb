@@ -11,11 +11,11 @@
 1. Build the code:
 
    ```sh
-   dune build
+   make build
    ```
 
 1. Run a super messy example:
 
    ```sh
-   dune run
+   make run
    ```
