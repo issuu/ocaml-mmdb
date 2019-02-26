@@ -7,7 +7,7 @@ OCaml bindings to the MaxMind Geo IP database (also known as GeoIP2).
 1. Set up a separate environment with all thedependencies:
 
    ```sh
-   opam switch create . --deps-only
+   opam switch create . --deps-only ocaml-base-compiler.4.07.1
    ```
 
 1. Build the code:
