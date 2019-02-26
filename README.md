@@ -1,5 +1,7 @@
 # ocaml-mmdb
 
+OCaml bindings to the MaxMind Geo IP database (also known as GeoIP2).
+
 ## Development setup
 
 1. Set up a separate environment with all thedependencies:
