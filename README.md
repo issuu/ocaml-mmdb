@@ -11,7 +11,7 @@
 1. Build the code:
 
    ```sh
-   make build
+   make
    ```
 
 1. Run a super messy example:
