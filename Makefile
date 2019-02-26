@@ -11,9 +11,9 @@ clean: ## Clean the source tree
 format: ## Reformat all code
 	dune build @fmt --auto-promote
 
-.PHONY: run
-run: build etc/GeoLite2-City.mmdb
-	_build/default/src/example/example.exe
+.PHONY: example
+example: etc/GeoLite2-City.mmdb ## Build and run the example
+	dune exec src/example/example.exe
 
 etc/GeoLite2-City.mmdb:
 	mkdir -p etc
