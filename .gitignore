@@ -1,5 +1,5 @@
-_opam
-_build
+/_opam/
+/_build/
 .merlin
-mmdb.install
-etc
+*.install
+/etc/
