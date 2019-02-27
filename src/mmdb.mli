@@ -1,10 +1,4 @@
-open Core
-
 type t
-
-type path = [`Path of string]
-
-type ip = [`Ip of string]
 
 module Common_error : sig
   type t =
@@ -40,17 +34,17 @@ module Lookup_error : sig
 end
 
 module Lookup_result : sig
-  type 'a t = ('a option, Lookup_error.t) Result.t
+  type 'a t = ('a option, Lookup_error.t) result
 end
 
-module Coordinates : sig
-  type t = {longitude: float; latitude: float} [@@deriving show]
-end
+module Path = Types.Path
 
-val open_file : path -> (t, Open_file_error.t) Result.t
+module Ip = Types.Ip
 
-val coordinates : t -> ip -> Coordinates.t Lookup_result.t
+val open_file : Path.t -> (t, Open_file_error.t) result
 
-val country_code : t -> ip -> string Lookup_result.t
+val coordinates : t -> Ip.t -> Coordinates.t Lookup_result.t
 
-val region_code : t -> ip -> string Lookup_result.t
+val country_code : t -> Ip.t -> string Lookup_result.t
+
+val region_code : t -> Ip.t -> string Lookup_result.t
