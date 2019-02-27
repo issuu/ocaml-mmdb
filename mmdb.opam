@@ -11,5 +11,7 @@ depends: [
   "base" {>= "v0.11" < "v0.12"}
   "ctypes" {>= "0.14" < "0.15"}
   "ctypes-foreign" {>= "0.4" < "0.5"}
+  "ppx_let" {>= "v0.11" < "v0.12"}
+  "ppx_deriving" {>= "4.2" < "5.0"}
 ]
 synopsis: "MaxMind DB library for OCaml based on ocaml-ctypes and stub generation"

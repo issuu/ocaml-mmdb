@@ -21,7 +21,7 @@ module M (F : Ctypes.TYPE) = struct
     let () = F.seal t
   end
 
-  module LookupResult = struct
+  module Lookup_result = struct
     type t
 
     let t : t structure = F.structure "MMDB_lookup_result_s"
@@ -35,13 +35,13 @@ module M (F : Ctypes.TYPE) = struct
     let () = F.seal t
   end
 
-  module EntryData = struct
+  module Entry_data = struct
     type t = unit Ctypes_static.ptr
 
     let t : t typ = F.(ptr void)
   end
 
-  module EntryDataType = struct
+  module Entry_data_type = struct
     let extended = F.(constant "MMDB_DATA_TYPE_EXTENDED" int)
 
     let pointer = F.(constant "MMDB_DATA_TYPE_POINTER" int)
@@ -75,13 +75,13 @@ module M (F : Ctypes.TYPE) = struct
     let float = F.(constant "MMDB_DATA_TYPE_FLOAT" int)
   end
 
-  module MmdbMode = struct
+  module Mmdb_mode = struct
     let mmap = F.(constant "MMDB_MODE_MMAP" int)
 
     let mask = F.(constant "MMDB_MODE_MASK" int)
   end
 
-  module ErrorCode = struct
+  module Error_code = struct
     let success = F.(constant "MMDB_SUCCESS" int)
 
     let file_open_error = F.(constant "MMDB_FILE_OPEN_ERROR" int)
