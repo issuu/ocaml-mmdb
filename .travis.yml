@@ -8,3 +8,7 @@ env:
     - TESTS=true
   matrix:
     - OCAML_VERSION=4.07
+addons:
+  apt:
+    packages:
+      - libmaxminddb-dev
