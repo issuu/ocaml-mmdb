@@ -8,6 +8,7 @@
 
 (library
  (name mmdb_types)
+ (public_name mmdb.types)
  (synopsis
    "Ctypes bindings that describe the libmaxminddb constants and types")
  (flags :standard -w -9-27 -cclib -lmaxminddb)

@@ -16,6 +16,7 @@
 
 (library
  (name mmdb_ffi)
+ (public_name mmdb.ffi)
  (synopsis
    "Ctypes bindings for libmaxminddb header functions and some additional helpers")
  (flags :standard -cclib -lmaxminddb)
