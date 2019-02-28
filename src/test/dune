@@ -6,6 +6,7 @@
 (alias
  (name runtest)
  (deps
+  ../../etc/GeoLite2-City.mmdb
   (:test test.exe))
  (action
   (run %{test} --color=always)))

@@ -16,7 +16,7 @@ module ToAlcotestSuite (S : ParametrizedTestSuite) = struct
 end
 
 module Path = struct
-  let correct = Mmdb.Path.of_string "../../../../etc/GeoLite2-City.mmdb"
+  let correct = Mmdb.Path.of_string "../../etc/GeoLite2-City.mmdb"
 
   let incorrect = Mmdb.Path.of_string "GeoGeoGeoGeoGeo.mmdb"
 end
