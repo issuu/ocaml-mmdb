@@ -1,0 +1,17 @@
+FROM alpine
+RUN apk update && apk add alpine-sdk m4 opam libffi-dev libmaxminddb-dev
+
+RUN addgroup ci
+RUN adduser -S -D -u 10000 -G ci -g '' ci
+USER ci
+RUN opam init --compiler=ocaml-base-compiler.4.07.1 --auto-setup --disable-sandboxing
+
+USER root
+COPY . /home/ci/ocaml-mmdb
+RUN chown -R ci:ci /home/ci/ocaml-mmdb
+USER ci
+
+WORKDIR /home/ci/ocaml-mmdb
+RUN opam install . --deps-only --yes
+
+CMD ["/bin/bash", "-c", "eval $(opam env) && make build example"]

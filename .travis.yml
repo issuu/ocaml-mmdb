@@ -1,16 +1,5 @@
-dist: xenial
-language: c
-sudo: required
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
-script: bash -ex .travis-opam.sh
-env:
-  global:
-    - DEPOPTS="*"
-    - TESTS=true
-  matrix:
-    - OCAML_VERSION=4.07
-addons:
-  apt:
-    update: true
-    packages:
-      - libmaxminddb-dev
+services:
+  - docker
+
+script:
+  - make docker-ci
