@@ -11,10 +11,12 @@ module Ip = Types.Ip
 
 let open_file path =
   let path = path |> Path.to_string |> Pointers.Char_ptr.of_string in
-  let mmdb = Pointers.Mmdb.allocate () in
+  let should_close = ref false in
+  let finalise mmdb = if !should_close then Mmdb_ffi.Core.close mmdb in
+  let mmdb = Pointers.Mmdb.allocate ~finalise () in
   let result = Mmdb_ffi.Core.open_file path Mmdb_types.Mmdb_mode.mmap mmdb in
   match Errors.Open_file_error.of_error_code result with
-  | None -> Ok mmdb
+  | None -> (should_close := true; Ok mmdb)
   | Some error -> Error error
 
 let lookup_ip mmdb ~ip =
