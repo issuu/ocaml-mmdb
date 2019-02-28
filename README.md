@@ -18,8 +18,8 @@ OCaml bindings to the MaxMind Geo IP database (also known as GeoIP2).
    make
    ```
 
-1. Run a super messy example:
+1. Run tests:
 
    ```sh
-   make example
+   make test
    ```
