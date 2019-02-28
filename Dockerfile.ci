@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.9
 RUN apk update && apk add alpine-sdk m4 opam libffi-dev libmaxminddb-dev
 
 RUN addgroup ci
