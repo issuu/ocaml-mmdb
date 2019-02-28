@@ -24,7 +24,7 @@ end
 module Ip = struct
   let correct = Mmdb.Ip.of_string "172.56.31.240"
 
-  let incorrect = Mmdb.Ip.of_string "172.56.31.240 blah"
+  let incorrect = Mmdb.Ip.of_string "blah 172.56.31.240"
 end
 
 module OpenFileSuite = ToAlcotestSuite (struct
