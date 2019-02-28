@@ -8,6 +8,7 @@ module Lookup_ip_error = Errors.Lookup_ip_error
 module Lookup_error = Errors.Lookup_error
 module Path = Types.Path
 module Ip = Types.Ip
+module Coordinates = Coordinates
 
 let open_file path =
   let path = path |> Path.to_string |> Pointers.Char_ptr.of_string in

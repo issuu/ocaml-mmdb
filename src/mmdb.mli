@@ -38,8 +38,8 @@ module Lookup_result : sig
 end
 
 module Path = Types.Path
-
 module Ip = Types.Ip
+module Coordinates = Coordinates
 
 val open_file : Path.t -> (t, Open_file_error.t) result
 
