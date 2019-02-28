@@ -14,7 +14,7 @@ let open_file path =
   let mmdb = Pointers.Mmdb.allocate () in
   let result = Mmdb_ffi.Core.open_file path Mmdb_types.Mmdb_mode.mmap mmdb in
   match Errors.Open_file_error.of_error_code result with
-  | None -> Caml.Gc.finalise (fun mmdb -> Mmdb_ffi.Core.close mmdb) mmdb; Ok mmdb
+  | None -> Ok mmdb
   | Some error -> Error error
 
 let lookup_ip mmdb ~ip =

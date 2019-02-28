@@ -66,7 +66,8 @@ module Mmdb = struct
     Ctypes.abstract ~name ~size ~alignment
 
   let allocate () : Mmdb_types.Mmdb.t =
-    Ctypes.allocate_n t ~count:1 |> Ctypes.to_voidp
+    let finalise mmdb = mmdb |> Ctypes.to_voidp |> Mmdb_ffi.Core.close in
+    Ctypes.allocate_n ~finalise t ~count:1 |> Ctypes.to_voidp
 end
 
 module Entry_data = struct
