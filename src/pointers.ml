@@ -35,11 +35,10 @@ module Char_ptr = struct
     let char_arr = Ctypes.CArray.from_ptr char_ptr length in
     let buffer = Buffer.create length in
     let rec add_chars_from index =
-      if index = length - 1 then ()
-      else
+      if index < length then (
         let char = Ctypes.CArray.get char_arr index in
         Buffer.add_char buffer char ;
-        Int.succ index |> add_chars_from
+        Int.succ index |> add_chars_from )
     in
     add_chars_from 0 ; Buffer.contents buffer
 end
