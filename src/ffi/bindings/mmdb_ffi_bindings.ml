@@ -13,6 +13,8 @@ module M (F : Ctypes.FOREIGN) = struct
     let open_file =
       F.foreign "MMDB_open" C.(ptr char @-> int @-> T.Mmdb.t @-> returning int)
 
+    let close = F.foreign "MMDB_close" C.(T.Mmdb.t @-> returning void)
+
     let lookup_string =
       F.foreign "MMDB_lookup_string"
         C.(
