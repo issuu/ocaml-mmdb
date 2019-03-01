@@ -13,4 +13,4 @@ addons:
   apt:
     update: true
     sources:
-      - ppa:maxmind/ppa
+      - sourceline: 'ppa:maxmind/ppa'
