@@ -8,6 +8,7 @@ module Lookup_ip_error = Errors.Lookup_ip_error
 module Lookup_error = Errors.Lookup_error
 module Path = Types.Path
 module Ip = Types.Ip
+module Coordinates = Coordinates
 
 let open_file path =
   let path = path |> Path.to_string |> Pointers.Char_ptr.of_string in
@@ -16,7 +17,9 @@ let open_file path =
   let mmdb = Pointers.Mmdb.allocate ~finalise () in
   let result = Mmdb_ffi.Core.open_file path Mmdb_types.Mmdb_mode.mmap mmdb in
   match Errors.Open_file_error.of_error_code result with
-  | None -> (should_close := true; Ok mmdb)
+  | None ->
+      should_close := true ;
+      Ok mmdb
   | Some error -> Error error
 
 let lookup_ip mmdb ~ip =

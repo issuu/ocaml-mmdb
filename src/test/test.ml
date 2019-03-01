@@ -16,9 +16,9 @@ module ToAlcotestSuite (S : ParametrizedTestSuite) = struct
 end
 
 module Path = struct
-  let correct = Mmdb.Path.of_string "../../etc/GeoLite2-City.mmdb"
+  let correct = Mmdb.Path.of_string "sample.mmdb"
 
-  let incorrect = Mmdb.Path.of_string "GeoGeoGeoGeoGeo.mmdb"
+  let incorrect = Mmdb.Path.of_string "sample-not-there.mmdb"
 end
 
 module Ip = struct
@@ -78,13 +78,14 @@ module FetchingCommon = struct
 
     let value_found = Ok true
 
-    let invalid_lookup_path = Error (`Invalid_lookup_path "")
+    let invalid_address_info = Error `Invalid_address_info
 
     let check fetch_name expected actual =
       let open_file_error_testable =
         Alcotest.testable Mmdb.Lookup_error.pp (fun expected actual ->
             match (expected, actual) with
             | `Unsupported_data_type _, `Unsupported_data_type _ -> true
+            | `Invalid_address_info, `Invalid_address_info -> true
             | `Invalid_lookup_path _, `Invalid_lookup_path _ -> true
             | ( `Lookup_path_does_not_match_data _
               , `Lookup_path_does_not_match_data _ ) ->
@@ -119,7 +120,7 @@ module FetchingCommon = struct
         "Returns 'Invalid_lookup_path' when fetching %s for an invalid IP \
          address"
         fetch_name
-      |> test Ip.incorrect Expectation.invalid_lookup_path ]
+      |> test Ip.incorrect Expectation.invalid_address_info ]
 
   let run_test fetch_name fetch (ip, expected) =
     match Mmdb.open_file Path.correct with
@@ -171,4 +172,3 @@ let () =
       ; RegionCodeFetchingSuite.tests ]
   in
   Alcotest.run "ocaml-mmdb test suite" [("End-to-end", e2e_tests)]
-

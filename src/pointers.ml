@@ -64,7 +64,7 @@ module Mmdb = struct
     in
     Ctypes.abstract ~name ~size ~alignment
 
-  let allocate ?(finalise=Fn.ignore) () : Mmdb_types.Mmdb.t =
+  let allocate ?(finalise = Fn.ignore) () : Mmdb_types.Mmdb.t =
     let finalise value = Ctypes.to_voidp value |> finalise in
     Ctypes.allocate_n ~finalise t ~count:1 |> Ctypes.to_voidp
 end
