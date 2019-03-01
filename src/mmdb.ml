@@ -21,19 +21,19 @@ let open_file path =
 
 let lookup_ip mmdb ~ip =
   let ip = Pointers.Char_ptr.of_string ip in
-  let error_code_ptr1 = Pointers.Int_ptr.allocate () in
-  let error_code_ptr2 = Pointers.Int_ptr.allocate () in
+  let address_error_code_ptr = Pointers.Int_ptr.allocate () in
+  let mmdb_error_code_ptr = Pointers.Int_ptr.allocate () in
   let lookup_result =
-    Mmdb_ffi.Core.lookup_string mmdb ip error_code_ptr1 error_code_ptr2
+    Mmdb_ffi.Core.lookup_string mmdb ip address_error_code_ptr
+      mmdb_error_code_ptr
   in
-  let error_code1 = Ctypes.(!@error_code_ptr1) in
-  let error_code2 = Ctypes.(!@error_code_ptr2) in
-  match Errors.Lookup_ip_error.of_error_code error_code1 with
+  let address_error_code = Ctypes.(!@address_error_code_ptr) in
+  let mmdb_error_code = Ctypes.(!@mmdb_error_code_ptr) in
+  match
+    Errors.Lookup_ip_error.of_error_code ~address_error_code mmdb_error_code
+  with
   | Some e -> Error e
-  | None -> (
-    match Errors.Lookup_ip_error.of_error_code error_code2 with
-    | Some e -> Error e
-    | None -> Ok lookup_result )
+  | None -> Ok lookup_result
 
 module Supported_data_type = struct
   type t =
