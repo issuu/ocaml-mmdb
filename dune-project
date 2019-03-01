@@ -1,3 +1,3 @@
-(lang dune 1.7)
+(lang dune 1.6)
 (name mmdb)
-(using fmt 1.1)
+(using fmt 1.0)
