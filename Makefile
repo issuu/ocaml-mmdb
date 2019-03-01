@@ -28,4 +28,4 @@ help: ## Display this help
 .PHONY: docker-ci
 docker-ci: ## Build the code and run the example on Docker
 	docker build -t ocaml-mmdb-ci -f Dockerfile.ci .
-	docker run ocaml-mmdb-ci
+	docker run --privileged ocaml-mmdb-ci

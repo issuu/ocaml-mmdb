@@ -4,7 +4,7 @@ RUN apk update && apk add alpine-sdk m4 opam libffi-dev libmaxminddb-dev
 RUN addgroup ci
 RUN adduser -S -D -u 10000 -G ci -g '' ci
 USER ci
-RUN opam init --compiler=ocaml-base-compiler.4.07.1 --auto-setup --disable-sandboxing
+RUN opam init --compiler=ocaml-base-compiler.4.07.1 --auto-setup
 
 USER root
 COPY . /home/ci/ocaml-mmdb
