@@ -52,26 +52,29 @@ end
 
 module Lookup_ip_error = struct
   type t =
-    [ `Invalid_lookup_path of string
+    [ `Invalid_address_info
+    | `Invalid_lookup_path of string
     | `Lookup_path_does_not_match_data of string
     | `Invalid_node_number of string
     | `Ipv6_lookup_in_ipv4_database of string
     | Common_error.t ]
   [@@deriving show]
 
-  let of_error_code error_code =
-    let get_message () = Error_code.to_message error_code in
-    Mmdb_types.Error_code.(
-      match error_code with
-      | error_code when error_code = invalid_lookup_path_error ->
-          Some (`Invalid_lookup_path (get_message ()))
-      | error_code when error_code = lookup_path_does_not_match_data_error ->
-          Some (`Lookup_path_does_not_match_data (get_message ()))
-      | error_code when error_code = invalid_node_number_error ->
-          Some (`Invalid_node_number (get_message ()))
-      | error_code when error_code = ipv6_lookup_in_ipv4_database_error ->
-          Some (`Ipv6_lookup_in_ipv4_database (get_message ()))
-      | _ -> Common_error.of_error_code error_code)
+  let of_error_code ?(address_error_code = 0) error_code =
+    if address_error_code != 0 then Some `Invalid_address_info
+    else
+      let get_message () = Error_code.to_message error_code in
+      Mmdb_types.Error_code.(
+        match error_code with
+        | error_code when error_code = invalid_lookup_path_error ->
+            Some (`Invalid_lookup_path (get_message ()))
+        | error_code when error_code = lookup_path_does_not_match_data_error ->
+            Some (`Lookup_path_does_not_match_data (get_message ()))
+        | error_code when error_code = invalid_node_number_error ->
+            Some (`Invalid_node_number (get_message ()))
+        | error_code when error_code = ipv6_lookup_in_ipv4_database_error ->
+            Some (`Ipv6_lookup_in_ipv4_database (get_message ()))
+        | _ -> Common_error.of_error_code error_code)
 end
 
 module Lookup_error = struct

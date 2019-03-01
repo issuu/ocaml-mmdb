@@ -20,7 +20,8 @@ end
 
 module Lookup_ip_error : sig
   type t =
-    [ `Invalid_lookup_path of string
+    [ `Invalid_address_info
+    | `Invalid_lookup_path of string
     | `Lookup_path_does_not_match_data of string
     | `Invalid_node_number of string
     | `Ipv6_lookup_in_ipv4_database of string
@@ -39,6 +40,7 @@ end
 
 module Path = Types.Path
 module Ip = Types.Ip
+module Coordinates = Coordinates
 
 val open_file : Path.t -> (t, Open_file_error.t) result
 

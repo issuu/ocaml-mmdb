@@ -11,15 +11,9 @@ clean: ## Clean the source tree
 format: ## Reformat all code
 	dune build @fmt --auto-promote
 
-.PHONY: example
-example: etc/GeoLite2-City.mmdb ## Build and run the example
-	dune exec src/example/example.exe
-
-etc/GeoLite2-City.mmdb:
-	mkdir -p etc
-	curl https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz | tar -x -C etc
-	mv etc/GeoLite2-City_*/* etc
-	rm -r etc/GeoLite2-City_*
+.PHONY: test
+test: ## Run the tests
+	dune runtest --force
 
 .PHONY: help
 help: ## Display this help
