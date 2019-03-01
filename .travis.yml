@@ -12,5 +12,5 @@ env:
 addons:
   apt:
     update: true
-    packages:
-      - libmaxminddb-dev
+    sources:
+      - sourceline: 'ppa:leonidas/libmaxminddb'

@@ -9,6 +9,7 @@ run-test: [["dune" "runtest" "-p" name "-j" jobs]]
 depends: [
   "dune" {build & >= "1.7"}
   "base" {>= "v0.11" < "v0.12"}
+  "conf-libmaxminddb"
   "ctypes" {>= "0.14" < "0.15"}
   "ctypes-foreign" {>= "0.4" < "0.5"}
   "ppx_let" {>= "v0.11" < "v0.12"}
