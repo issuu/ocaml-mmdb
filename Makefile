@@ -5,7 +5,6 @@ build: ## Build the code
 .PHONY: clean
 clean: ## Clean the source tree
 	dune clean
-	rm -rf etc
 
 .PHONY: format
 format: ## Reformat all code
