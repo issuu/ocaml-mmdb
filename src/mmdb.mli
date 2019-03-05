@@ -21,9 +21,6 @@ end
 module Lookup_ip_error : sig
   type t =
     [ `Invalid_address_info
-    | `Invalid_lookup_path of string
-    | `Lookup_path_does_not_match_data of string
-    | `Invalid_node_number of string
     | `Ipv6_lookup_in_ipv4_database of string
     | Common_error.t ]
   [@@deriving show]
