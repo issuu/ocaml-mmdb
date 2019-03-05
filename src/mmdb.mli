@@ -47,14 +47,14 @@ module Path = Types.Path
 module Ip = Types.Ip
 module Coordinates = Coordinates
 
-(* Open an MMDB file and return a reference to it *)
+(** Open an MMDB file and return a reference to it *)
 val open_file : Path.t -> (t, Open_file_error.t) result
 
-(* Determine the coordinates of an IP *)
+(** Determine the coordinates of an IP *)
 val coordinates : t -> Ip.t -> Coordinates.t Lookup_result.t
 
-(* Determine the country code of an IP *)
+(** Determine the country code of an IP *)
 val country_code : t -> Ip.t -> string Lookup_result.t
 
-(* Determine the region an IP is in *)
+(** Determine the region an IP is in *)
 val region_code : t -> Ip.t -> string Lookup_result.t
