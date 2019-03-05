@@ -2,6 +2,8 @@ open Base
 
 type t = Mmdb_types.Mmdb.t
 
+exception Binding_integrity_error = Errors.Binding_integrity_error
+
 module Common_error = Errors.Common_error
 module Open_file_error = Errors.Open_file_error
 module Lookup_ip_error = Errors.Lookup_ip_error

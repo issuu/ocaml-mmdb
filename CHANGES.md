@@ -1,3 +1,6 @@
+* Introduced a separate exception type thrown by the library when an internal
+  error occurs.
+
 * Simplified error type returned by data lookup functions:
 
   * Removed `Invalid_node_number` and `Invalid_lookup_path` error variants

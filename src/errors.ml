@@ -1,3 +1,5 @@
+exception Binding_integrity_error of string
+
 module Error_code = struct
   let to_message error_code =
     Mmdb_ffi.Core.strerror error_code |> Pointers.Char_ptr.to_string
@@ -26,7 +28,10 @@ module Common_error = struct
       | error_code when error_code = invalid_data_error ->
           Some (`Invalid_data (get_message ()))
       | _ ->
-          Printf.sprintf "Unrecognized error code: %d" error_code |> failwith)
+          let message =
+            Printf.sprintf "Unrecognized error code: %d" error_code
+          in
+          Binding_integrity_error message |> raise)
 end
 
 module Open_file_error = struct
@@ -60,12 +65,14 @@ module Lookup_ip_error = struct
   let of_error_code ?(address_error_code = 0) error_code =
     if address_error_code != 0 then Some `Invalid_address_info
     else
-      let get_message () = Error_code.to_message error_code in
+      let get_error_message () = Error_code.to_message error_code in
       let fail error_name =
-        get_message ()
-        |> Printf.sprintf "Bindings to libmaxminddb caused an '%s' error: %s"
-             error_name
-        |> failwith
+        let message =
+          get_error_message ()
+          |> Printf.sprintf "Bindings to libmaxminddb caused an '%s' error: %s"
+               error_name
+        in
+        Binding_integrity_error message |> raise
       in
       Mmdb_types.Error_code.(
         match error_code with
@@ -74,7 +81,7 @@ module Lookup_ip_error = struct
         | error_code when error_code = invalid_node_number_error ->
             fail "invalid_node_number"
         | error_code when error_code = ipv6_lookup_in_ipv4_database_error ->
-            Some (`Ipv6_lookup_in_ipv4_database (get_message ()))
+            Some (`Ipv6_lookup_in_ipv4_database (get_error_message ()))
         | _ -> Common_error.of_error_code error_code)
 end
 

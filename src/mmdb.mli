@@ -1,5 +1,7 @@
 type t
 
+exception Binding_integrity_error of string
+
 module Common_error : sig
   type t =
     [ `Corrupt_search_tree of string
