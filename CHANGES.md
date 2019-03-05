@@ -1,3 +1,6 @@
+0.2.0
+=====
+
 * Introduced a separate exception type thrown by the library when an internal
   error occurs.
 
