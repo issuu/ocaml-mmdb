@@ -1,3 +1,5 @@
+* Removed 'build' constraint from ppx dependencies.
+
 0.2.0
 =====
 
