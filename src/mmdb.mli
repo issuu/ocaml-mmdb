@@ -1,6 +1,6 @@
 (** Binding to the maxminddb library which parses the MMDB format commonly known as GeoIP2 *)
 
-(** Reference to a MMBD file *)
+(** Reference to an MMBD file *)
 type t
 
 (** Thrown when an error is detected that is an internal error of the library, not a
@@ -26,7 +26,7 @@ module Open_file_error : sig
   [@@deriving show]
 end
 
-module Lookup_ip_error : sig
+module Fetch_ip_data_error : sig
   type t =
     [ `Invalid_address_info
     | `Ipv6_lookup_in_ipv4_database of string
@@ -34,27 +34,96 @@ module Lookup_ip_error : sig
   [@@deriving show]
 end
 
-module Lookup_error : sig
-  type t = [`Unsupported_data_type of string | Lookup_ip_error.t]
+module Fetch_value_error : sig
+  type t =
+    [ `Invalid_lookup_path of string
+    | `Invalid_node_number of string
+    | `Unsupported_data_type of string
+    | `Unexpected_data_type of string
+    | Common_error.t ]
   [@@deriving show]
 end
 
-module Lookup_result : sig
-  type 'a t = ('a option, Lookup_error.t) result
+module Fetch_error : sig
+  type t = [Fetch_ip_data_error.t | Fetch_value_error.t] [@@deriving show]
 end
 
 module Path = Types.Path
-module Ip = Types.Ip
-module Coordinates = Coordinates
 
 (** Open an MMDB file and return a reference to it *)
 val open_file : Path.t -> (t, Open_file_error.t) result
 
-(** Determine the coordinates of an IP *)
-val coordinates : t -> Ip.t -> Coordinates.t Lookup_result.t
+module Ip = Types.Ip
 
-(** Determine the country code of an IP *)
-val country_code : t -> Ip.t -> string Lookup_result.t
+(** An opaque reference to the data structure associated with an IP address *)
+type ip_data
 
-(** Determine the region an IP is in *)
-val region_code : t -> Ip.t -> string Lookup_result.t
+(** Retrieves the data associated with the supplied IP address *)
+val fetch_ip_data : t -> Ip.t -> (ip_data, Fetch_ip_data_error.t) result
+
+(** Signatures for handling queries that yield a particular type of answer *)
+module type VALUE_TYPE = sig
+  module Query : sig
+    (** Represents a query for this value type *)
+    type t
+
+    (** Construct a query from a path within *)
+    val of_string_list : string list -> t
+
+    (** Return the path for  *)
+    val to_string_list : t -> string list
+  end
+
+  (** The type of answer returned by a query *)
+  type answer
+
+  (** Fetches a value directly from the database *)
+  val from_db : t -> Ip.t -> Query.t -> (answer option, Fetch_error.t) result
+
+  (** Fetches a value from an {!ip_data} reference *)
+  val from_ip_data :
+    ip_data -> Query.t -> (answer option, Fetch_value_error.t) result
+end
+
+(** The supported atomic value types that can be retrieved from a database *)
+type any_value =
+  | String of string
+  | Float of float
+  | Int of int
+  | Bool of bool
+
+(** Interface to query for values of type {!any_value}. This may come useful
+    in case the database contains different value types at the same query path.
+    Specialized modules for retrieving strings, floats, integers and booleans
+    are available below. *)
+module Any : VALUE_TYPE with type answer = any_value
+
+(** Interface for retrieving string values from the database *)
+module String : sig
+  include VALUE_TYPE with type answer = string
+
+  (** Query that determines the code of the country where the IP is located *)
+  val country_code : Query.t
+
+  (** Query that determines the code of the region where the IP is located *)
+  val region_code : Query.t
+end
+
+(** Interface for retrieving float values from the database *)
+module Float : VALUE_TYPE with type answer = float
+
+(** Interface for retrieving integer values from the database *)
+module Int : VALUE_TYPE with type answer = int
+
+(** Interface for retrieving boolean values from the database *)
+module Bool : VALUE_TYPE with type answer = bool
+
+(** Interface for retrieving coordinate values from the database *)
+module Coordinates : sig
+  include module type of Coordinates
+
+  include VALUE_TYPE with type answer = Coordinates.t
+
+  (** Query that determines the geographical location of an IP *)
+  val location : Query.t
+end

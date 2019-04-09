@@ -1,3 +1,5 @@
+* Added support for custom queries
+
 0.2.1
 =====
 
