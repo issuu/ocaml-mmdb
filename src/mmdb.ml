@@ -62,48 +62,47 @@ module Supported_data_type = struct
 
   let of_data_type_code code =
     let data_type = Unsigned.UInt32.to_int code in
-    Mmdb_types.Entry_data_type.(
-      match data_type with
-      | data_type when data_type = utf8_string -> Some Utf8_String
-      | data_type when data_type = double -> Some Double
-      | data_type when data_type = uint16 -> Some Uint16
-      | data_type when data_type = uint32 -> Some Uint32
-      | data_type when data_type = int32 -> Some Int32
-      | data_type when data_type = uint64 -> Some Uint64
-      | data_type when data_type = boolean -> Some Boolean
-      | data_type when data_type = float -> Some Float
-      | _ -> None)
+    let module T = Mmdb_types.Entry_data_type in
+    match data_type with
+    | data_type when data_type = T.utf8_string -> Some Utf8_String
+    | data_type when data_type = T.double -> Some Double
+    | data_type when data_type = T.uint16 -> Some Uint16
+    | data_type when data_type = T.uint32 -> Some Uint32
+    | data_type when data_type = T.int32 -> Some Int32
+    | data_type when data_type = T.uint64 -> Some Uint64
+    | data_type when data_type = T.boolean -> Some Boolean
+    | data_type when data_type = T.float -> Some Float
+    | _ -> None
 
   let convert_to_value data_type entry_data_ptr =
-    Mmdb_ffi.Helpers.(
-      match data_type with
-      | Utf8_String ->
-          let length =
-            get_entry_data_size entry_data_ptr
-            |> Unsigned.UInt32.to_int
-          in
-          String
-            ( entry_data_ptr |> get_entry_data_utf8_string_value
-            |> Pointers.Char_ptr.to_string_of_length length )
-      | Double -> Float (entry_data_ptr |> get_entry_data_double_value)
-      | Uint16 ->
-          Int
-            ( entry_data_ptr |> get_entry_data_uint16_value
-            |> Unsigned.UInt16.to_int )
-      | Uint32 ->
-          Int
-            ( entry_data_ptr |> get_entry_data_uint32_value
-            |> Unsigned.UInt32.to_int )
-      | Int32 ->
-          Int
-            ( entry_data_ptr |> get_entry_data_int32_value
-            |> Signed.Int32.to_int )
-      | Uint64 ->
-          Int
-            ( entry_data_ptr |> get_entry_data_uint64_value
-            |> Unsigned.UInt64.to_int )
-      | Boolean -> Bool (entry_data_ptr |> get_entry_data_boolean_value)
-      | Float -> Float (entry_data_ptr |> get_entry_data_float_value))
+    let module H = Mmdb_ffi.Helpers in
+    match data_type with
+    | Utf8_String ->
+        let length =
+          H.get_entry_data_size entry_data_ptr |> Unsigned.UInt32.to_int
+        in
+        String
+          ( entry_data_ptr |> H.get_entry_data_utf8_string_value
+          |> Pointers.Char_ptr.to_string_of_length length )
+    | Double -> Float (entry_data_ptr |> H.get_entry_data_double_value)
+    | Uint16 ->
+        Int
+          ( entry_data_ptr |> H.get_entry_data_uint16_value
+          |> Unsigned.UInt16.to_int )
+    | Uint32 ->
+        Int
+          ( entry_data_ptr |> H.get_entry_data_uint32_value
+          |> Unsigned.UInt32.to_int )
+    | Int32 ->
+        Int
+          ( entry_data_ptr |> H.get_entry_data_int32_value
+          |> Signed.Int32.to_int )
+    | Uint64 ->
+        Int
+          ( entry_data_ptr |> H.get_entry_data_uint64_value
+          |> Unsigned.UInt64.to_int )
+    | Boolean -> Bool (entry_data_ptr |> H.get_entry_data_boolean_value)
+    | Float -> Float (entry_data_ptr |> H.get_entry_data_float_value)
 
   let get_value entry_data_ptr =
     let data_type_code = Mmdb_ffi.Helpers.get_entry_data_type entry_data_ptr in
