@@ -79,7 +79,7 @@ module Supported_data_type = struct
       match data_type with
       | Utf8_String ->
           let length =
-            Mmdb_ffi.Helpers.get_entry_data_size entry_data_ptr
+            get_entry_data_size entry_data_ptr
             |> Unsigned.UInt32.to_int
           in
           String

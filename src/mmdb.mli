@@ -1,6 +1,6 @@
 (** Binding to the maxminddb library which parses the MMDB format commonly known as GeoIP2 *)
 
-(** Reference to a MMBD file *)
+(** Reference to an MMBD file *)
 type t
 
 (** Thrown when an error is detected that is an internal error of the library, not a
@@ -55,35 +55,50 @@ val open_file : Path.t -> (t, Open_file_error.t) result
 
 module Ip = Types.Ip
 
+(** An opaque reference to the data structure associated with an IP address *)
 type ip_data
 
+(** Retrieves the data associated with the supplied IP address *)
 val fetch_ip_data : t -> Ip.t -> (ip_data, Fetch_ip_data_error.t) result
 
+(** Signatures for handling queries that yield a particular type of answer *)
 module type VALUE_TYPE = sig
   module Query : sig
+    (** Represents a query for this value type *)
     type t
 
+    (** Construct a query from a path within *)
     val of_string_list : string list -> t
 
+    (** Return the path for  *)
     val to_string_list : t -> string list
   end
 
+  (** The type of answer returned by a query *)
   type answer
 
+  (** Fetches a value directly from the database *)
   val from_db : t -> Ip.t -> Query.t -> (answer option, Fetch_error.t) result
 
+  (** Fetches a value from an {!ip_data} reference *)
   val from_ip_data :
     ip_data -> Query.t -> (answer option, Fetch_value_error.t) result
 end
 
+(** The supported atomic value types that can be retrieved from a database *)
 type any_value =
   | String of string
   | Float of float
   | Int of int
   | Bool of bool
 
+(** Interface to query for values of type {!any_value}. This may come useful
+    in case the database contains different value types at the same query path.
+    Specialized modules for retrieving strings, floats, integers and booleans
+    are available below. *)
 module Any : VALUE_TYPE with type answer = any_value
 
+(** Interface for retrieving string values from the database *)
 module String : sig
   include VALUE_TYPE with type answer = string
 
@@ -94,17 +109,21 @@ module String : sig
   val region_code : Query.t
 end
 
+(** Interface for retrieving float values from the database *)
 module Float : VALUE_TYPE with type answer = float
 
+(** Interface for retrieving integer values from the database *)
 module Int : VALUE_TYPE with type answer = int
 
+(** Interface for retrieving boolean values from the database *)
 module Bool : VALUE_TYPE with type answer = bool
 
+(** Interface for retrieving coordinate values from the database *)
 module Coordinates : sig
   include module type of Coordinates
 
   include VALUE_TYPE with type answer = Coordinates.t
 
-  (** Query that determines the coordinates of an IP *)
+  (** Query that determines the geographical location of an IP *)
   val location : Query.t
 end
