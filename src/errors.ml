@@ -55,7 +55,7 @@ module Open_file_error = struct
       | _ -> Common_error.of_error_code error_code)
 end
 
-module Lookup_ip_error = struct
+module Fetch_ip_data_error = struct
   type t =
     [ `Invalid_address_info
     | `Ipv6_lookup_in_ipv4_database of string
@@ -66,29 +66,36 @@ module Lookup_ip_error = struct
     if address_error_code != 0 then Some `Invalid_address_info
     else
       let get_error_message () = Error_code.to_message error_code in
-      let fail error_name =
-        let message =
-          get_error_message ()
-          |> Printf.sprintf "Bindings to libmaxminddb caused an '%s' error: %s"
-               error_name
-        in
-        Binding_integrity_error message |> raise
-      in
       Mmdb_types.Error_code.(
         match error_code with
-        | error_code when error_code = invalid_lookup_path_error ->
-            fail "invalid_lookup_path"
-        | error_code when error_code = invalid_node_number_error ->
-            fail "invalid_node_number"
         | error_code when error_code = ipv6_lookup_in_ipv4_database_error ->
             Some (`Ipv6_lookup_in_ipv4_database (get_error_message ()))
         | _ -> Common_error.of_error_code error_code)
 end
 
-module Lookup_error = struct
-  type t = [`Unsupported_data_type of string | Lookup_ip_error.t]
+module Fetch_value_error = struct
+  type t =
+    [ `Invalid_lookup_path of string
+    | `Invalid_node_number of string
+    | `Unsupported_data_type of string
+    | `Unexpected_data_type of string
+    | Common_error.t ]
   [@@deriving show]
+
+  let of_error_code error_code =
+    let get_error_message () = Error_code.to_message error_code in
+    Mmdb_types.Error_code.(
+      match error_code with
+      | error_code when error_code = invalid_lookup_path_error ->
+          Some (`Invalid_lookup_path (get_error_message ()))
+      | error_code when error_code = invalid_node_number_error ->
+          Some (`Invalid_node_number (get_error_message ()))
+      | _ -> Common_error.of_error_code error_code)
 
   let is_ignorable_error_code error_code =
     error_code = Mmdb_types.Error_code.lookup_path_does_not_match_data_error
+end
+
+module Fetch_error = struct
+  type t = [Fetch_ip_data_error.t | Fetch_value_error.t] [@@deriving show]
 end

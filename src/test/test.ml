@@ -74,7 +74,7 @@ module FetchingCommon = struct
   module Expectation = struct
     type value_found = bool
 
-    type t = (value_found, Mmdb.Lookup_error.t) Result.t
+    type t = (value_found, Mmdb.Fetch_error.t) Result.t
 
     let value_found = Ok true
 
@@ -82,7 +82,7 @@ module FetchingCommon = struct
 
     let check fetch_name expected actual =
       let open_file_error_testable =
-        Alcotest.testable Mmdb.Lookup_error.pp (fun expected actual ->
+        Alcotest.testable Mmdb.Fetch_error.pp (fun expected actual ->
             match (expected, actual) with
             | `Unsupported_data_type _, `Unsupported_data_type _ -> true
             | `Invalid_address_info, `Invalid_address_info -> true
@@ -135,7 +135,8 @@ module CoordinateFetchingSuite = ToAlcotestSuite (struct
 
   let tests = tests fetch_name
 
-  let run_test = run_test fetch_name Mmdb.coordinates
+  let run_test =
+    run_test fetch_name (fun db ip -> Mmdb.Coordinates.(from_db db ip location))
 end)
 
 module CountryCodeFetchingSuite = ToAlcotestSuite (struct
@@ -145,7 +146,8 @@ module CountryCodeFetchingSuite = ToAlcotestSuite (struct
 
   let tests = tests fetch_name
 
-  let run_test = run_test fetch_name Mmdb.country_code
+  let run_test =
+    run_test fetch_name (fun db ip -> Mmdb.String.(from_db db ip country_code))
 end)
 
 module RegionCodeFetchingSuite = ToAlcotestSuite (struct
@@ -155,7 +157,8 @@ module RegionCodeFetchingSuite = ToAlcotestSuite (struct
 
   let tests = tests fetch_name
 
-  let run_test = run_test fetch_name Mmdb.region_code
+  let run_test =
+    run_test fetch_name (fun db ip -> Mmdb.String.(from_db db ip region_code))
 end)
 
 let () =
