@@ -19,7 +19,7 @@ let open_file path =
   let result = Mmdb_ffi.Core.open_file path Mmdb_types.Mmdb_mode.mmap mmdb in
   match Open_file_error.of_error_code result with
   | None ->
-      should_close := true ;
+      should_close := true;
       Ok mmdb
   | Some error -> Error error
 
@@ -32,14 +32,11 @@ let fetch_ip_data mmdb ip =
   let address_error_code_ptr = Pointers.Int_ptr.allocate () in
   let mmdb_error_code_ptr = Pointers.Int_ptr.allocate () in
   let lookup_result =
-    Mmdb_ffi.Core.lookup_string mmdb ip address_error_code_ptr
-      mmdb_error_code_ptr
+    Mmdb_ffi.Core.lookup_string mmdb ip address_error_code_ptr mmdb_error_code_ptr
   in
   let address_error_code = Ctypes.(!@address_error_code_ptr) in
   let mmdb_error_code = Ctypes.(!@mmdb_error_code_ptr) in
-  match
-    Fetch_ip_data_error.of_error_code ~address_error_code mmdb_error_code
-  with
+  match Fetch_ip_data_error.of_error_code ~address_error_code mmdb_error_code with
   | Some e -> Error e
   | None -> Ok lookup_result
 
@@ -78,29 +75,19 @@ module Supported_data_type = struct
     let module H = Mmdb_ffi.Helpers in
     match data_type with
     | Utf8_String ->
-        let length =
-          H.get_entry_data_size entry_data_ptr |> Unsigned.UInt32.to_int
-        in
+        let length = H.get_entry_data_size entry_data_ptr |> Unsigned.UInt32.to_int in
         String
-          ( entry_data_ptr |> H.get_entry_data_utf8_string_value
+          ( entry_data_ptr
+          |> H.get_entry_data_utf8_string_value
           |> Pointers.Char_ptr.to_string_of_length length )
     | Double -> Float (entry_data_ptr |> H.get_entry_data_double_value)
     | Uint16 ->
-        Int
-          ( entry_data_ptr |> H.get_entry_data_uint16_value
-          |> Unsigned.UInt16.to_int )
+        Int (entry_data_ptr |> H.get_entry_data_uint16_value |> Unsigned.UInt16.to_int)
     | Uint32 ->
-        Int
-          ( entry_data_ptr |> H.get_entry_data_uint32_value
-          |> Unsigned.UInt32.to_int )
-    | Int32 ->
-        Int
-          ( entry_data_ptr |> H.get_entry_data_int32_value
-          |> Signed.Int32.to_int )
+        Int (entry_data_ptr |> H.get_entry_data_uint32_value |> Unsigned.UInt32.to_int)
+    | Int32 -> Int (entry_data_ptr |> H.get_entry_data_int32_value |> Signed.Int32.to_int)
     | Uint64 ->
-        Int
-          ( entry_data_ptr |> H.get_entry_data_uint64_value
-          |> Unsigned.UInt64.to_int )
+        Int (entry_data_ptr |> H.get_entry_data_uint64_value |> Unsigned.UInt64.to_int)
     | Boolean -> Bool (entry_data_ptr |> H.get_entry_data_boolean_value)
     | Float -> Float (entry_data_ptr |> H.get_entry_data_float_value)
 
@@ -108,9 +95,7 @@ module Supported_data_type = struct
     let data_type_code = Mmdb_ffi.Helpers.get_entry_data_type entry_data_ptr in
     match of_data_type_code data_type_code with
     | Some data_type -> Ok (Some (convert_to_value data_type entry_data_ptr))
-    | None ->
-        Error
-          (`Unsupported_data_type (Unsigned.UInt32.to_string data_type_code))
+    | None -> Error (`Unsupported_data_type (Unsigned.UInt32.to_string data_type_code))
 end
 
 let any_value_from_db lookup_result query : (any_value option, _) Result.t =
@@ -159,8 +144,7 @@ module type VALUE_TYPE = sig
 
   val from_db : t -> Ip.t -> Query.t -> (answer option, Fetch_error.t) Result.t
 
-  val from_ip_data :
-    ip_data -> Query.t -> (answer option, Fetch_value_error.t) Result.t
+  val from_ip_data : ip_data -> Query.t -> (answer option, Fetch_value_error.t) Result.t
 end
 
 module Any = struct
@@ -184,9 +168,7 @@ module String = struct
     | None -> Ok None
     | Some (String s) -> Ok (Some s)
     | Some _ ->
-        Error
-          (`Unexpected_data_type
-            "String query returned an unexpected value type")
+        Error (`Unexpected_data_type "String query returned an unexpected value type")
 
   let from_db = value_from_db from_ip_data
 
@@ -206,9 +188,7 @@ module Float = struct
     | None -> Ok None
     | Some (Float f) -> Ok (Some f)
     | Some _ ->
-        Error
-          (`Unexpected_data_type
-            "Float query returned an unexpected value type")
+        Error (`Unexpected_data_type "Float query returned an unexpected value type")
 
   let from_db = value_from_db from_ip_data
 end
@@ -224,8 +204,7 @@ module Int = struct
     | None -> Ok None
     | Some (Int n) -> Ok (Some n)
     | Some _ ->
-        Error
-          (`Unexpected_data_type "Int query returned an unexpected value type")
+        Error (`Unexpected_data_type "Int query returned an unexpected value type")
 
   let from_db = value_from_db from_ip_data
 end
@@ -241,9 +220,7 @@ module Bool = struct
     | None -> Ok None
     | Some (Bool b) -> Ok (Some b)
     | Some _ ->
-        Error
-          (`Unexpected_data_type
-            "Bool query returned an unexpected value type")
+        Error (`Unexpected_data_type "Bool query returned an unexpected value type")
 
   let from_db = value_from_db from_ip_data
 end
@@ -257,12 +234,10 @@ module Coordinates = struct
 
   let from_ip_data ip_data query =
     let latitude_query =
-      List.concat [Query.of_string_list query; ["latitude"]]
-      |> Query.of_string_list
+      List.concat [Query.of_string_list query; ["latitude"]] |> Query.of_string_list
     in
     let longitude_query =
-      List.concat [Query.of_string_list query; ["longitude"]]
-      |> Query.of_string_list
+      List.concat [Query.of_string_list query; ["longitude"]] |> Query.of_string_list
     in
     let open Result.Let_syntax in
     let%bind latitude = Float.from_ip_data ip_data latitude_query in

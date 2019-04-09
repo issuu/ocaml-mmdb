@@ -7,5 +7,5 @@ let prologue =
    #include <maxminddb.h>\n"
 
 let () =
-  print_endline prologue ;
+  print_endline prologue;
   Cstubs.Types.write_c Format.std_formatter (module Mmdb_types_bindings.M)

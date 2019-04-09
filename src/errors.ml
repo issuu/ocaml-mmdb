@@ -21,16 +21,13 @@ module Common_error = struct
     | error_code when error_code = E.success -> None
     | error_code when error_code = E.corrupt_search_tree_error ->
         Some (`Corrupt_search_tree (get_message ()))
-    | error_code when error_code = E.io_error ->
-        Some (`Io_error (get_message ()))
+    | error_code when error_code = E.io_error -> Some (`Io_error (get_message ()))
     | error_code when error_code = E.out_of_memory_error ->
         Some (`Out_of_memory (get_message ()))
     | error_code when error_code = E.invalid_data_error ->
         Some (`Invalid_data (get_message ()))
     | _ ->
-        let message =
-          Printf.sprintf "Unrecognized error code: %d" error_code
-        in
+        let message = Printf.sprintf "Unrecognized error code: %d" error_code in
         Binding_integrity_error message |> raise
 end
 
@@ -63,7 +60,8 @@ module Fetch_ip_data_error = struct
   [@@deriving show]
 
   let of_error_code ?(address_error_code = 0) error_code =
-    if address_error_code != 0 then Some `Invalid_address_info
+    if address_error_code != 0
+    then Some `Invalid_address_info
     else
       let get_error_message () = Error_code.to_message error_code in
       let module E = Mmdb_types.Error_code in
@@ -97,5 +95,8 @@ module Fetch_value_error = struct
 end
 
 module Fetch_error = struct
-  type t = [Fetch_ip_data_error.t | Fetch_value_error.t] [@@deriving show]
+  type t =
+    [ Fetch_ip_data_error.t
+    | Fetch_value_error.t ]
+  [@@deriving show]
 end
