@@ -45,7 +45,10 @@ module Fetch_value_error : sig
 end
 
 module Fetch_error : sig
-  type t = [Fetch_ip_data_error.t | Fetch_value_error.t] [@@deriving show]
+  type t =
+    [ Fetch_ip_data_error.t
+    | Fetch_value_error.t ]
+  [@@deriving show]
 end
 
 module Path = Types.Path
@@ -81,8 +84,7 @@ module type VALUE_TYPE = sig
   val from_db : t -> Ip.t -> Query.t -> (answer option, Fetch_error.t) result
 
   (** Fetches a value from an {!ip_data} reference *)
-  val from_ip_data :
-    ip_data -> Query.t -> (answer option, Fetch_value_error.t) result
+  val from_ip_data : ip_data -> Query.t -> (answer option, Fetch_value_error.t) result
 end
 
 (** The supported atomic value types that can be retrieved from a database *)

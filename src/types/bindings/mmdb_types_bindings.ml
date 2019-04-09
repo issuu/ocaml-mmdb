@@ -86,8 +86,7 @@ module M (F : Ctypes.TYPE) = struct
 
     let file_open_error = F.(constant "MMDB_FILE_OPEN_ERROR" int)
 
-    let corrupt_search_tree_error =
-      F.(constant "MMDB_CORRUPT_SEARCH_TREE_ERROR" int)
+    let corrupt_search_tree_error = F.(constant "MMDB_CORRUPT_SEARCH_TREE_ERROR" int)
 
     let invalid_metadata_error = F.(constant "MMDB_INVALID_METADATA_ERROR" int)
 
@@ -100,14 +99,12 @@ module M (F : Ctypes.TYPE) = struct
 
     let invalid_data_error = F.(constant "MMDB_INVALID_DATA_ERROR" int)
 
-    let invalid_lookup_path_error =
-      F.(constant "MMDB_INVALID_LOOKUP_PATH_ERROR" int)
+    let invalid_lookup_path_error = F.(constant "MMDB_INVALID_LOOKUP_PATH_ERROR" int)
 
     let lookup_path_does_not_match_data_error =
       F.(constant "MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR" int)
 
-    let invalid_node_number_error =
-      F.(constant "MMDB_INVALID_NODE_NUMBER_ERROR" int)
+    let invalid_node_number_error = F.(constant "MMDB_INVALID_NODE_NUMBER_ERROR" int)
 
     let ipv6_lookup_in_ipv4_database_error =
       F.(constant "MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR" int)
