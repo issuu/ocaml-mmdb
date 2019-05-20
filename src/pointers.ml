@@ -49,6 +49,10 @@ module Char_ptr_ptr = struct
     let array = Ctypes.(CArray.make (ptr char) ~initial:(from_voidp char null) length) in
     List.iteri char_ptrs ~f:(fun index char_ptr -> Ctypes.CArray.set array index char_ptr);
     Ctypes.CArray.start array
+
+  let to_string_list count ptrs =
+    let array = Ctypes.CArray.from_ptr ptrs count in
+    List.init count ~f:(fun index -> Ctypes.CArray.get array index |> Char_ptr.to_string)
 end
 
 module Mmdb = struct

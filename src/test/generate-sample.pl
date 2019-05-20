@@ -7,6 +7,8 @@ my %types = (
     country => 'map',
     subdivisions  => [ 'array', 'map' ],
     location  => 'map',
+    names => [ 'map', 'map' ],
+    en => 'utf8_string'
 );
 
 my $tree = MaxMind::DB::Writer::Tree->new(
@@ -21,11 +23,11 @@ my $tree = MaxMind::DB::Writer::Tree->new(
 $tree->insert_network(
     '172.56.31.240/32',
     {
-        country => { iso_code => 'Country' },
-	subdivisions => [ { iso_code => 'Region' } ],
-	location => { latitude => 1.2, longitude => 3.4 },
+        country => { iso_code => 'Country', names => { en => 'Atlantis' } },
+        subdivisions => [ { iso_code => 'Region' } ],
+        location => { latitude => 1.2, longitude => 3.4 },
     },
 );
 
-open my $fh, '>:raw', 't.mmdb';
+open my $fh, '>:raw', 'sample.mmdb';
 $tree->write_tree($fh);

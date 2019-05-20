@@ -17,6 +17,22 @@ size_t mmdb_ml_alignof_mmdb_entry_data_s(void) {
     return offsetof(struct { char c; struct MMDB_entry_data_s x; }, x);
 }
 
+size_t mmdb_ml_language_count(MMDB_s* mmdb) {
+    return mmdb->metadata.languages.count;
+}
+
+char** mmdb_ml_language_names(MMDB_s* mmdb) {
+    return mmdb->metadata.languages.names;
+}
+
+uint16_t mmdb_ml_binary_format_major_version(MMDB_s* mmdb) {
+    return mmdb->metadata.binary_format_major_version;
+}
+
+uint16_t mmdb_ml_binary_format_minor_version(MMDB_s* mmdb) {
+    return mmdb->metadata.binary_format_minor_version;
+}
+
 uint32_t mmdb_ml_get_entry_data_has_data(MMDB_entry_data_s* data) {
     return data->has_data;
 }

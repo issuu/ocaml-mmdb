@@ -26,6 +26,8 @@ module M (F : Ctypes.FOREIGN) = struct
         C.(ptr T.Entry.t @-> T.Entry_data.t @-> ptr (ptr char) @-> returning int)
 
     let strerror = F.foreign "MMDB_strerror" C.(int @-> returning (ptr char))
+
+    let lib_version = F.foreign "MMDB_lib_version" C.(void @-> returning (ptr char))
   end
 
   module Helpers = struct
@@ -39,6 +41,18 @@ module M (F : Ctypes.FOREIGN) = struct
 
     let alignment_of_mmdb_entry_data_s =
       F.foreign "mmdb_ml_alignof_mmdb_entry_data_s" C.(void @-> returning size_t)
+
+    let language_count =
+      F.foreign "mmdb_ml_language_count" C.(T.Mmdb.t @-> returning size_t)
+
+    let language_names =
+      F.foreign "mmdb_ml_language_names" C.(T.Mmdb.t @-> returning (ptr (ptr char)))
+
+    let binary_format_major_version =
+      F.foreign "mmdb_ml_binary_format_major_version" C.(T.Mmdb.t @-> returning uint16_t)
+
+    let binary_format_minor_version =
+      F.foreign "mmdb_ml_binary_format_minor_version" C.(T.Mmdb.t @-> returning uint16_t)
 
     let get_entry_data_has_data =
       F.foreign "mmdb_ml_get_entry_data_has_data" C.(T.Entry_data.t @-> returning bool)

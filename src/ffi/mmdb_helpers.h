@@ -6,6 +6,11 @@ size_t mmdb_ml_alignof_mmdb_s(void);
 size_t mmdb_ml_sizeof_mmdb_entry_data_s(void);
 size_t mmdb_ml_alignof_mmdb_entry_data_s(void);
 
+size_t   mmdb_ml_language_count(MMDB_s* mmdb);
+char**   mmdb_ml_language_names(MMDB_s* mmdb);
+uint16_t mmdb_ml_binary_format_major_version(MMDB_s* mmdb);
+uint16_t mmdb_ml_binary_format_minor_version(MMDB_s* mmdb);
+
 bool           mmdb_ml_get_entry_data_has_data(MMDB_entry_data_s* data);
 uint32_t       mmdb_ml_get_entry_data_type(MMDB_entry_data_s* data);
 uint32_t       mmdb_ml_get_entry_data_size(MMDB_entry_data_s* data);

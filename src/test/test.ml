@@ -1,18 +1,6 @@
 open Base
 
-module type ParametrizedTestSuite = sig
-  type parameter
-
-  val tests : (parameter * string) list
-
-  val run_test : parameter -> unit
-end
-
-module ToAlcotestSuite (S : ParametrizedTestSuite) = struct
-  let tests =
-    List.map S.tests ~f:(fun (parameter, description) ->
-        Alcotest.test_case description `Quick (fun () -> S.run_test parameter) )
-end
+let test_case description run_test = Alcotest.test_case description `Quick run_test
 
 module Path = struct
   let correct = Mmdb.Path.of_string "sample.mmdb"
@@ -26,15 +14,25 @@ module Ip = struct
   let incorrect = Mmdb.Ip.of_string "blah 172.56.31.240"
 end
 
-module OpenFileSuite = ToAlcotestSuite (struct
-  module Expectation = struct
-    type t = (unit, Mmdb.Open_file_error.t) Result.t
+module Open_file_suite = struct
+  (* (language list, (major version, minor version)) *)
+  type mmdb_properties = string list * (int * int)
 
-    let success = Ok ()
-
-    let file_open_error = Error (`File_open_error "")
-
-    let check expected actual =
+  let tests =
+    let run_test path expected_result =
+      let actual_result =
+        Mmdb.open_file path
+        |> Result.map ~f:(fun mmdb ->
+               let languages =
+                 Mmdb.languages mmdb |> List.map ~f:Mmdb.Language.to_string
+               in
+               let version =
+                 Mmdb.binary_format_version mmdb
+                 |> Mmdb.Version_number.to_major_and_minor
+               in
+               languages, version )
+      in
+      let properties_testable = Alcotest.(pair (list string) (pair int int)) in
       let open_file_error_testable =
         Alcotest.testable Mmdb.Open_file_error.pp (fun expected actual ->
             match expected, actual with
@@ -47,119 +45,109 @@ module OpenFileSuite = ToAlcotestSuite (struct
             | `Invalid_data _, `Invalid_data _ -> true
             | _, _ -> false )
       in
-      let expectation_testable = Alcotest.(result unit open_file_error_testable) in
-      let message = "Mmdb.open_file result is not as expected" in
-      Alcotest.check expectation_testable message expected actual
-  end
-
-  type parameter = Mmdb.Path.t * Expectation.t
-
-  let test path expectation description = (path, expectation), description
-
-  let tests =
-    [ test Path.correct Expectation.success "Successfully opens a valid MMDB file";
-      test
-        Path.incorrect
-        Expectation.file_open_error
-        "Returns 'File_open_error' when opening a non-existing MMDB file" ]
-
-  let run_test (path, expected) =
-    let actual = Mmdb.open_file path |> Result.ignore in
-    Expectation.check expected actual
-end)
-
-module FetchingCommon = struct
-  module Expectation = struct
-    type value_found = bool
-
-    type t = (value_found, Mmdb.Fetch_error.t) Result.t
-
-    let value_found = Ok true
-
-    let invalid_address_info = Error `Invalid_address_info
-
-    let check fetch_name expected actual =
-      let open_file_error_testable =
-        Alcotest.testable Mmdb.Fetch_error.pp (fun expected actual ->
-            match expected, actual with
-            | `Unsupported_data_type _, `Unsupported_data_type _ -> true
-            | `Invalid_address_info, `Invalid_address_info -> true
-            | `Ipv6_lookup_in_ipv4_database _, `Ipv6_lookup_in_ipv4_database _ -> true
-            | `Corrupt_search_tree _, `Corrupt_search_tree _ -> true
-            | `Io_error _, `Io_error _ -> true
-            | `Out_of_memory _, `Out_of_memory _ -> true
-            | `Invalid_data _, `Invalid_data _ -> true
-            | _, _ -> false )
+      let result_testable =
+        Alcotest.(result properties_testable open_file_error_testable)
       in
-      let expectation_testable = Alcotest.(result bool open_file_error_testable) in
-      let message = Printf.sprintf "Lookup of %s is not as expected" fetch_name in
-      Alcotest.check expectation_testable message expected actual
-  end
-
-  type parameter = Mmdb.Ip.t * Expectation.t
-
-  let test path expectation description = (path, expectation), description
-
-  let tests fetch_name =
-    [ Printf.sprintf "Can fetch %s for a valid IP address" fetch_name
-      |> test Ip.correct Expectation.value_found;
-      Printf.sprintf
-        "Returns 'Invalid_lookup_path' when fetching %s for an invalid IP address"
-        fetch_name
-      |> test Ip.incorrect Expectation.invalid_address_info ]
-
-  let run_test fetch_name fetch (ip, expected) =
-    match Mmdb.open_file Path.correct with
-    | Error e -> Mmdb.Open_file_error.show e |> Alcotest.fail
-    | Ok mmdb ->
-        let actual =
-          fetch mmdb ip
-          |> Result.map ~f:(function
-                 | None -> false
-                 | Some _ -> true )
-        in
-        Expectation.check fetch_name expected actual
+      let message = "Mmdb.open_file result is not as expected" in
+      Alcotest.check result_testable message expected_result actual_result
+    in
+    [ test_case "Successfully opens a valid MMDB file" (fun () ->
+          run_test Path.correct (Ok (["en"], (2, 2))) );
+      test_case
+        "Returns 'File_open_error' when opening a non-existing MMDB file"
+        (fun () -> run_test Path.incorrect (Error (`File_open_error ""))) ]
 end
 
-module CoordinateFetchingSuite = ToAlcotestSuite (struct
-  include FetchingCommon
+module Metadata_suite = struct
+  let tests =
+    [ test_case "Library version is a dot-separated list of integers" (fun () ->
+          let version_number_strings = String.split Mmdb.library_version ~on:'.' in
+          List.iter version_number_strings ~f:(fun each ->
+              Int.of_string each |> Fn.ignore ) ) ]
+end
 
-  let fetch_name = "coordinates"
+module Fetching = struct
+  let tests name fetch success_value value_testable =
+    let run_test ip expected_result =
+      match Mmdb.open_file Path.correct with
+      | Error e -> Mmdb.Open_file_error.show e |> Alcotest.fail
+      | Ok mmdb ->
+          let actual_result = fetch mmdb ip in
+          let fetch_error_testable =
+            Alcotest.testable Mmdb.Fetch_error.pp (fun expected actual ->
+                match expected, actual with
+                | `Unsupported_data_type _, `Unsupported_data_type _ -> true
+                | `Invalid_address_info, `Invalid_address_info -> true
+                | `Ipv6_lookup_in_ipv4_database _, `Ipv6_lookup_in_ipv4_database _ ->
+                    true
+                | `Corrupt_search_tree _, `Corrupt_search_tree _ -> true
+                | `Io_error _, `Io_error _ -> true
+                | `Out_of_memory _, `Out_of_memory _ -> true
+                | `Invalid_data _, `Invalid_data _ -> true
+                | _, _ -> false )
+          in
+          let expectation_testable =
+            Alcotest.(result (option value_testable) fetch_error_testable)
+          in
+          let message = Printf.sprintf "Lookup of %s is not as expected" name in
+          Alcotest.check expectation_testable message expected_result actual_result
+    in
+    [ test_case
+        (Printf.sprintf "Successfully fetches %s for a valid IP address" name)
+        (fun () -> run_test Ip.correct (Ok (Some success_value)));
+      test_case
+        (Printf.sprintf
+           "Returns 'Invalid_address_info' when fetching %s for an invalid IP address"
+           name)
+        (fun () -> run_test Ip.incorrect (Error `Invalid_address_info)) ]
+end
 
-  let tests = tests fetch_name
+module Coordinate_fetching_suite = struct
+  let tests =
+    let coordinates_testable =
+      Alcotest.(
+        testable Mmdb.Coordinates.pp (fun first second ->
+            let precision = 1e-6 in
+            let close x y = Float.(abs (x - y) <= precision) in
+            close first.latitude second.latitude
+            && close first.longitude second.longitude ))
+    in
+    let fetch_coordinates db ip = Mmdb.Coordinates.(from_db db ip location) in
+    Fetching.tests
+      "coordinates"
+      fetch_coordinates
+      Mmdb.Coordinates.{latitude = 1.2; longitude = 3.4}
+      coordinates_testable
+end
 
-  let run_test =
-    run_test fetch_name (fun db ip -> Mmdb.Coordinates.(from_db db ip location))
-end)
+module Country_code_fetching_suite = struct
+  let tests =
+    let fetch_country_code db ip = Mmdb.String.(from_db db ip country_code) in
+    Fetching.tests "country code" fetch_country_code "Country" Alcotest.string
+end
 
-module CountryCodeFetchingSuite = ToAlcotestSuite (struct
-  include FetchingCommon
+module Country_name_fetching_suite = struct
+  let tests =
+    let language = Mmdb.Language.of_string "en" in
+    let query = Mmdb.String.country_name language in
+    let fetch_country_name db ip = Mmdb.String.(from_db db ip query) in
+    Fetching.tests "country name" fetch_country_name "Atlantis" Alcotest.string
+end
 
-  let fetch_name = "country code"
-
-  let tests = tests fetch_name
-
-  let run_test =
-    run_test fetch_name (fun db ip -> Mmdb.String.(from_db db ip country_code))
-end)
-
-module RegionCodeFetchingSuite = ToAlcotestSuite (struct
-  include FetchingCommon
-
-  let fetch_name = "region code"
-
-  let tests = tests fetch_name
-
-  let run_test =
-    run_test fetch_name (fun db ip -> Mmdb.String.(from_db db ip region_code))
-end)
+module Region_code_fetching_suite = struct
+  let tests =
+    let fetch_region_code db ip = Mmdb.String.(from_db db ip region_code) in
+    Fetching.tests "region code" fetch_region_code "Region" Alcotest.string
+end
 
 let () =
   let e2e_tests =
     List.concat
-      [ OpenFileSuite.tests;
-        CoordinateFetchingSuite.tests;
-        CountryCodeFetchingSuite.tests;
-        RegionCodeFetchingSuite.tests ]
+      [ Open_file_suite.tests;
+        Metadata_suite.tests;
+        Coordinate_fetching_suite.tests;
+        Country_code_fetching_suite.tests;
+        Country_name_fetching_suite.tests;
+        Region_code_fetching_suite.tests ]
   in
   Alcotest.run "ocaml-mmdb test suite" ["End-to-end", e2e_tests]
