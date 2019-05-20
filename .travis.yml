@@ -8,7 +8,7 @@ env:
     - TESTS=true
   matrix:
     - OCAML_VERSION=4.04
-    - OCAML_VERSION=4.07
+    - OCAML_VERSION=4.07 EXTRA_DEPS="ocamlformat.0.9" PRE_INSTALL_HOOK="make format"
 addons:
   apt:
     update: true
