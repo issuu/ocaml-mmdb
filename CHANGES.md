@@ -1,4 +1,9 @@
-* Added support for custom queries
+* Added support for custom queries.
+
+* Added API for retrieving the list of languages supported by the database.
+  These can subsequently be used in both built-in and custom queries.
+
+* Added API for retrieving library and file format versions.
 
 0.2.1
 =====
