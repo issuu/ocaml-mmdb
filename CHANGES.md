@@ -1,3 +1,6 @@
+0.3.0
+=====
+
 * Added support for custom queries.
 
 * Added API for retrieving the list of languages supported by the database.
