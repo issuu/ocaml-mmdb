@@ -51,10 +51,26 @@ module Fetch_error : sig
   [@@deriving show]
 end
 
+(** The version string of the underlying C library *)
+val library_version : string
+
 module Path = Types.Path
 
 (** Open an MMDB file and return a reference to it *)
 val open_file : Path.t -> (t, Open_file_error.t) result
+
+module Version_number = Types.Version_number
+
+(** The version number of the binary format in underlying MMDB file *)
+val binary_format_version : t -> Version_number.t
+
+module Language = Types.Language
+
+(** Retrieves a list of languages supported by the database *)
+val languages : t -> Language.t list
+
+(** Retrieves a specific language by its language code *)
+val language_by_code : t -> string -> Language.t option
 
 module Ip = Types.Ip
 
@@ -109,6 +125,15 @@ module String : sig
 
   (** Query that determines the code of the region where the IP is located *)
   val region_code : Query.t
+
+  (** Creates a query that retrieves the localized name of the city where the IP is located *)
+  val city_name : Language.t -> Query.t
+
+  (** Creates a query that retrieves the localized name of the country where the IP is located *)
+  val country_name : Language.t -> Query.t
+
+  (** Creates a query that retrieves the localized name of the continent where the IP is located *)
+  val continent_name : Language.t -> Query.t
 end
 
 (** Interface for retrieving float values from the database *)

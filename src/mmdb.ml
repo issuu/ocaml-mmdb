@@ -11,6 +11,8 @@ module Fetch_value_error = Errors.Fetch_value_error
 module Fetch_error = Errors.Fetch_error
 module Path = Types.Path
 
+let library_version = Mmdb_ffi.Core.lib_version () |> Pointers.Char_ptr.to_string
+
 let open_file path =
   let path = path |> Path.to_string |> Pointers.Char_ptr.of_string in
   let should_close = ref false in
@@ -22,6 +24,29 @@ let open_file path =
       should_close := true;
       Ok mmdb
   | Some error -> Error error
+
+module Version_number = Types.Version_number
+
+let binary_format_version mmdb =
+  let major =
+    Mmdb_ffi.Helpers.binary_format_major_version mmdb |> Unsigned.UInt16.to_int
+  in
+  let minor =
+    Mmdb_ffi.Helpers.binary_format_major_version mmdb |> Unsigned.UInt16.to_int
+  in
+  Version_number.of_major_and_minor (major, minor)
+
+module Language = Types.Language
+
+let languages mmdb =
+  let count = Mmdb_ffi.Helpers.language_count mmdb |> Unsigned.Size_t.to_int in
+  let name_pointers = Mmdb_ffi.Helpers.language_names mmdb in
+  Pointers.Char_ptr_ptr.to_string_list count name_pointers
+  |> List.map ~f:Language.of_string
+
+let language_by_code mmdb language_code =
+  languages mmdb
+  |> List.find ~f:(fun each -> String.equal language_code (Language.to_string each))
 
 module Ip = Types.Ip
 
@@ -175,6 +200,15 @@ module String = struct
   let country_code = Query.of_string_list ["country"; "iso_code"]
 
   let region_code = Query.of_string_list ["subdivisions"; "0"; "iso_code"]
+
+  let city_name language =
+    Query.of_string_list ["city"; "names"; Language.to_string language]
+
+  let country_name language =
+    Query.of_string_list ["country"; "names"; Language.to_string language]
+
+  let continent_name language =
+    Query.of_string_list ["continent"; "names"; Language.to_string language]
 end
 
 module Float = struct
