@@ -13,4 +13,4 @@ addons:
   apt:
     update: true
     sources:
-      - sourceline: 'ppa:leonidas/libmaxminddb'
+      - sourceline: 'ppa:maxmind/ppa'
